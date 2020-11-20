@@ -12,7 +12,7 @@ from std_msgs.msg import String
 from cv_bridge import CvBridge, CvBridgeError
 from sensor_msgs.msg import Image
 # if you can not find cv2 in your python, you can try this. usually happen when you use conda.
-sys.path.remove('/opt/ros/kinetic/lib/python2.7/dist-packages')
+sys.path.remove('/opt/ros/melodic/lib/python2.7/dist-packages')
 import cv2
 import tello_base as tello
 
@@ -57,7 +57,6 @@ class control_handler:
         command = "cw "+(str(cm))
         self.control_pub.publish(command)
 
-
     def ccw(self, cm):
         command = "ccw "+(str(cm))
         self.control_pub.publish(command)
@@ -66,6 +65,11 @@ class control_handler:
         command = "takeoff"
         self.control_pub.publish(command)
         print ("ready")
+        
+    def mon(self):
+        command = "mon"
+        self.control_pub.publish(command)
+        print ("mon")
 
     def land(self):
         command = "land"
@@ -139,7 +143,7 @@ def showimg():
     global img, img_lock
     img_lock.acquire()
     cv2.imshow("tello_image", img)
-    cv2.waitKey(30)
+    cv2.waitKey(2)
     img_lock.release()
 
 # mini task: take off and fly to the center of the blanket.
@@ -171,40 +175,41 @@ class task_handle():
             self.ctrl.up(distance) # tello up
             time.sleep(4) # wait for command finished
             showimg()
+        print("Find locating blanket!")
         self.now_stage = self.taskstages.order_location
 
     def order_location(self):# adjust tello to the center of locating blanket
         assert (self.now_stage == self.taskstages.order_location)
         state_conf = 0
         self.States_Dict = parse_state()
-        while not ( self.States_Dict['mpry'][1] + 90 <= 8 and self.States_Dict['mpry'][1] + 90 >= -8 and self.States_Dict['x'] <= 120 and self.States_Dict['x'] >= 80 and  self.States_Dict['y'] <= 120 and self.States_Dict['y'] >= 80 and abs(self.States_Dict['z']) >= 150 and abs(self.States_Dict['z']) <= 190):
-            if ( abs(self.States_Dict['z']) > 190 or abs(self.States_Dict['z']) < 150 ):
-                if (abs(self.States_Dict['z']) < 150):
+        while not ( self.States_Dict['mpry'][1] <= 8 and self.States_Dict['mpry'][1] >= -8 and self.States_Dict['x'] <= 20 and self.States_Dict['x'] >= -20 and  self.States_Dict['y'] <= 20 and self.States_Dict['y'] >= -20 and abs(self.States_Dict['z']) >= 120 and abs(self.States_Dict['z']) <= 160):
+            if ( abs(self.States_Dict['z']) > 160 or abs(self.States_Dict['z']) < 120 ):
+                if (abs(self.States_Dict['z']) < 120):
                     self.ctrl.up(20)     
                     time.sleep(4)
-                elif (abs(self.States_Dict['z']) > 190):
+                elif (abs(self.States_Dict['z']) > 160):
                     self.ctrl.down(20) 
                     time.sleep(4)
-            elif ( self.States_Dict['mpry'][1] + 90 < -8 or self.States_Dict['mpry'][1] + 90 > 8 ):
-                if (self.States_Dict['mpry'][1] + 90 < -8):
+            elif ( self.States_Dict['mpry'][1] < -8 or self.States_Dict['mpry'][1] > 8 ):
+                if (self.States_Dict['mpry'][1] > 8):
                     self.ctrl.cw(10)
                     time.sleep(4)
-                elif(self.States_Dict['mpry'][1] + 90 > 8):
+                elif(self.States_Dict['mpry'][1] < -8):
                     self.ctrl.ccw(10)
                     time.sleep(4)
-            elif ( self.States_Dict['x'] < 80 or self.States_Dict['x'] > 120 ):
-                if (self.States_Dict['x'] < 80):
-                    self.ctrl.right(20)
+            elif ( self.States_Dict['x'] < -20 or self.States_Dict['x'] > 20 ):
+                if (self.States_Dict['x'] < -20):
+                    self.ctrl.forward(20)
                     time.sleep(4)
-                elif(self.States_Dict['x'] > 120):
-                    self.ctrl.left(20)
-                    time.sleep(4)
-            elif ( self.States_Dict['y'] < 80 or self.States_Dict['y'] > 120 ):
-                if (self.States_Dict['y'] < 80):
+                elif(self.States_Dict['x'] > 20):
                     self.ctrl.back(20)
                     time.sleep(4)
-                elif(self.States_Dict['y'] > 120):
-                    self.ctrl.forward(20)
+            elif ( self.States_Dict['y'] < -20 or self.States_Dict['y'] > 20 ):
+                if (self.States_Dict['y'] < -20):
+                    self.ctrl.left(20)
+                    time.sleep(4)
+                elif(self.States_Dict['y'] > 20):
+                    self.ctrl.right(20)
                     time.sleep(4)
             else:
                 time.sleep(2)
@@ -226,16 +231,24 @@ if __name__ == '__main__':
     ctrl = control_handler(control_pub)
     infouper = info_updater()
     tasker = task_handle(ctrl)
-
-    time.sleep(5.2)
-    ctrl.takeoff( )
+    
+    time.sleep(2)
+    ctrl.mon()
+    time.sleep(5)
+    while(1):
+        if parse_state()['mid'] == -1:
+            ctrl.takeoff( )
+            print("take off")
+            break
+    #print("mon")
     time.sleep(4)
     ctrl.up(60)
-    time.sleep(4)
+    print("up 60")
+    time.sleep(2)
 
     tasker.main()
 
-    # ctrl.land()
+    ctrl.land()
 
     
 

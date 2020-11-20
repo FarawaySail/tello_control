@@ -7,10 +7,8 @@
 ## 1.安装
 
 ```
-conda create -n tello python=2.7
-conda activate tello
-
-pip install pyyaml numpy matplotlib opencv-python
+pip install --upgrade pip
+pip install pyyaml matplotlib opencv-python==3.4.0.12
 
 cd ~/catkin_ws/src/
 git clone https://github.com/zoeyuchao/tello_control.git
@@ -42,13 +40,11 @@ roscore
 3. **新打开终端**，运行:
 
 ```
-conda activate tello
 rosrun tello_control tello_state.py
 ```
 4. **新打开终端**，运行:
 
 ```
-conda activate tello
 rosrun tello_control tello_control.py
 ```
 
@@ -94,7 +90,7 @@ sys.path.remove('/opt/ros/kinetic/lib/python2.7/dist-packages')
 
 - receiving video stream 端口11111（负责接收图像信息）
 - receiving state 端口8890（负责接收状态信息）
-- 控制指令见SDK2.0[文件](https://github.com/zoeyuchao/tello_control/blob/master/Tello_SDK_2.0_使用说明.pdf)
+- 控制指令见SDK2.0[文件](https://github.com/FarawaySail/tello_control/blob/master/Tello_SDK_2.0_使用说明.pdf)
 
 
 

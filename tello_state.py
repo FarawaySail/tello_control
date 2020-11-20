@@ -10,7 +10,7 @@ from std_msgs.msg import String
 from cv_bridge import CvBridge, CvBridgeError
 from sensor_msgs.msg import Image
 # if you can not find cv2 in your python, you can try this. usually happen when you use conda.
-#sys.path.append('/opt/ros/kinetic/lib/python2.7/dist-packages')
+#sys.path.append('/opt/ros/melodic/lib/python2.7/dist-packages')
 import cv2
 import tello_base as tello
 
@@ -30,7 +30,8 @@ def control():
 	# drone.send_command("go 0 50 0 10")
 	# drone.send_command("land")
 	# print drone.send_command("battery?")
-
+        # drone.send_command("mon")
+        # print("mon")
 
 if __name__ == '__main__':
 	drone = tello.Tello('', 8888)

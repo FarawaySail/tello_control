@@ -139,7 +139,8 @@ class Tello:
                 state, ip = self.socket_state.recvfrom(1024)
                 out = state.replace(';', ';\n')
                 self.results = out.split()
-                #print(self.response)
+
+                #print("received result: " + str(self.results) )
             except socket.error as exc:
                 print ("Caught exception socket.error : %s" % exc)
 
